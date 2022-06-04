@@ -24,4 +24,4 @@ def on_user_info(server: PluginServerInterface, info: Info):
     else:
         user = info.player
         command = message.split(" ", maxsplit=1)[1]
-    server.execute(f"execute as {user} run {command}")
+    server.execute(f"execute as {user} at {user} run {command}")
