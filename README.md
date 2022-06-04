@@ -1,8 +1,24 @@
-MCDReforged Plugin Template
+Sudo plugin for MCDReforged
 -----
 
-A template for MCDReforged (>=2.x) plugin
+Execute any command as the server or any player.
 
-Try `python -m mcdreforged pack` to generate the packed plugin!
+#### Examples:
 
-This template is under the CC0 license. Feel free to use it!
+give yourself op:
+```plaintext
+!!sudo op @s
+```
+
+kill Steve:
+```plaintext
+!!sudo -u Steve kill @s
+```
+
+#### Config:
+```json
+{
+  "permission_level": 4
+}
+```
+`permission_level`: Minimum permission required to use this command, defaults to 4.
