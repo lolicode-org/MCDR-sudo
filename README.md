@@ -5,9 +5,9 @@ Execute any command as the server or any player.
 
 #### Examples:
 
-give yourself op:
+give yourself a command block:
 ```plaintext
-!!sudo op @s
+!!sudo give @s command_block
 ```
 
 kill Steve:

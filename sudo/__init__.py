@@ -1,13 +1,13 @@
 from mcdreforged.api.all import *
 
-from sudo.config import config
+from sudo.config import CFG_PATH, Config
 
 level: int
 Prefix = "!!sudo"
 
 
 def print_help_message(source: CommandSource):
-    msg = "!!sudo example_command : execute command as ghost\n" \
+    msg = "!!sudo example_command : execute command as yourself\n" \
           "!!sudo -u example_user example_command : execute command as another user"
     source.reply(msg)
 
@@ -54,6 +54,8 @@ def register_command(server: PluginServerInterface):
 
 def on_load(server: PluginServerInterface, old):
     global level
-    level = config.get("permission_level", 4)
+    cfg = server.load_config_simple(CFG_PATH, target_class=Config, in_data_folder=False, echo_in_console=True,
+                                    encoding='UTF-8')
+    level = cfg.permission_level
 
     register_command(server)
