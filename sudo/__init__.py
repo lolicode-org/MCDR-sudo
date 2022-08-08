@@ -2,26 +2,58 @@ from mcdreforged.api.all import *
 
 from sudo.config import config
 
-level = config.get("permission_level", 4)
+level: int
+Prefix = "!!sudo"
 
 
-def on_user_info(server: PluginServerInterface, info: Info):
-    message = info.content
-    if not message.startswith("!!sudo"):
-        return
-    if not info.get_command_source().has_permission(level):
-        info.get_command_source().reply(RText(server.tr('mcdr_command.permission_denied'), color=RColor.red))
-        return
-    params = message.split(" ", maxsplit=3)
+def print_help_message(source: CommandSource):
+    msg = "!!sudo example_command : execute command as ghost\n" \
+          "!!sudo -u example_user example_command : execute command as another user"
+    source.reply(msg)
 
-    if len(params) == 1:
-        info.get_command_source()\
-            .reply("Use !!sudo [-u Username] command to execute command as server or specific user.")
+
+def print_illegal_argument_message(source: CommandSource):
+    msg = "Illegal argument! Type !!sudo to get help."
+    source.reply(msg)
+
+
+def execute_command(source: CommandSource, context: dict):
+    if not context.get('command'):
+        source.reply('The necessary parameter "command" is missing.')
         return
-    elif len(params) >= 4 and params[1] == '-u':
-        user = params[2]
-        command = params[3]
-    else:
-        user = info.player
-        command = message.split(" ", maxsplit=1)[1]
-    server.execute(f"execute as {user} at {user} run {command}")
+    user = context.get("player") or (source.player if isinstance(source, PlayerCommandSource) else None)
+    cmd = f"execute as {user} at {user} run {context.get('command')}" if user else context.get('command')
+    source.get_server().execute(cmd)
+    source.reply("Command executed.")
+
+
+def register_command(server: PluginServerInterface):
+    server.register_command(
+        Literal(Prefix).
+        requires(lambda src: src.has_permission(level)).
+        on_error(RequirementNotMet,
+                 lambda src: src.reply((RText(server.tr('mcdr_command.permission_denied'), color=RColor.red)))).
+        runs(print_help_message).
+        on_error(UnknownArgument, print_help_message, handled=True).
+        then(
+            Literal("-u").
+            then(
+                QuotableText('player').
+                then(
+                    GreedyText('command').
+                    runs(execute_command)
+                )
+            )
+        ).
+        then(
+            GreedyText('command').
+            runs(execute_command)
+        )
+    )
+
+
+def on_load(server: PluginServerInterface, old):
+    global level
+    level = config.get("permission_level", 4)
+
+    register_command(server)
