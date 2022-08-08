@@ -1,1 +1,1 @@
-mcdreforged~=2.4.0
+mcdreforged>=2.0.0
